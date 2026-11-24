@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  RESTAURANT_ADMIN
+  KITCHEN_STAFF
+  WAITER
+}
+
+enum OrderStatus {
+  NEW
+  PREPARING
+  READY
+  SERVED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum PaymentMethod {
+  ONLINE
+  CASH_AT_TABLE
+  PAY_AT_COUNTER
+}
+
+enum ServiceRequestType {
+  WAITER_CALL
+  BILL_REQUEST
+}
+
+enum ServiceRequestStatus {
+  PENDING
+  RESOLVED
+}
+
+enum NotificationType {
+  NEW_ORDER
+  LOW_STOCK
+  DAILY_REPORT
+}
+
+enum NotificationStatus {
+  SENT
+  SIMULATED
+  FAILED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  role         Role
+  restaurantId String?    // nullable — Super Admin has no restaurant
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  createdAt    DateTime   @default(now())
+}
+
+model Restaurant {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  logoUrl          String?
+  description      String?
+  currencySymbol   String    @default("₹")
+  taxRate          Float     @default(5.0)
+  wifiName         String?
+  wifiPassword     String?
+  googleReviewUrl  String?
+  whatsappNumber   String?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  users            User[]
+  tables           Table[]
+  categories       Category[]
+  menuItems        MenuItem[]
+  orders           Order[]
+  serviceRequests  ServiceRequest[]
+  reviews          Review[]
+  notificationLogs NotificationLog[]
+}
+
+model Table {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  tableNumber  String     // e.g. "01", "05"
+  capacity     Int        @default(4)
+  isActive     Boolean    @default(true)
+
+  orders          Order[]
+  serviceRequests ServiceRequest[]
+  reviews         Review[]
+
+  @@unique([restaurantId, tableNumber])
+}
+
+model Category {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  sortOrder    Int        @default(0)
+
+  menuItems    MenuItem[]
+}
+
+model MenuItem {
+  id                 String     @id @default(cuid())
+  restaurantId       String
+  restaurant         Restaurant @relation(fields: [restaurantId], references: [id])
+  categoryId         String
+  category           Category   @relation(fields: [categoryId], references: [id])
+  name               String
+  description        String?
+  price              Float
+  imageUrl           String?
+  prepTime           String?    // e.g. "15-20 min"
+  spiceTag           String?    // e.g. "Medium spicy"
+  dietaryTag         String?    // e.g. "Veg" / "Non-Veg"
+  isAvailable        Boolean    @default(true)
+  stockCount         Int?       // nullable → unlimited
+  lowStockThreshold  Int        @default(5)
+
+  orderItems         OrderItem[]
+}
+
+model Order {
+  id             String        @id @default(cuid())
+  orderNumber    Int
+  restaurantId   String
+  restaurant     Restaurant    @relation(fields: [restaurantId], references: [id])
+  tableId        String
+  table          Table         @relation(fields: [tableId], references: [id])
+  status         OrderStatus   @default(NEW)
+  subtotal       Float
+  taxAmount      Float
+  totalAmount    Float
+  paymentStatus  PaymentStatus @default(UNPAID)
+  paymentMethod  PaymentMethod?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  orderItems     OrderItem[]
+  reviews        Review[]
+}
+
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  menuItemId    String
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+  nameSnapshot  String   // snapshot at order time (name may change)
+  priceSnapshot Float    // snapshot at order time (price may change)
+  quantity      Int
+  notes         String?
+}
+
+model ServiceRequest {
+  id           String               @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant           @relation(fields: [restaurantId], references: [id])
+  tableId      String
+  table        Table                @relation(fields: [tableId], references: [id])
+  type         ServiceRequestType
+  status       ServiceRequestStatus @default(PENDING)
+  createdAt    DateTime             @default(now())
+}
+
+model Review {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  tableId      String
+  table        Table      @relation(fields: [tableId], references: [id])
+  orderId      String?
+  order        Order?     @relation(fields: [orderId], references: [id])
+  rating       Int        // 1–5
+  tags         String[]   // e.g. ["Tasty food", "Fast service"]
+  comment      String?
+  isPublic     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+}
+
+model NotificationLog {
+  id           String             @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant         @relation(fields: [restaurantId], references: [id])
+  type         NotificationType
+  recipient    String
+  message      String
+  status       NotificationStatus
+  createdAt    DateTime           @default(now())
+}

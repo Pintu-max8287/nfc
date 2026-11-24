@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── DineFlow CSS Design Tokens ─────────────────────────────────────────── */
+:root {
+  /* Font Variables */
+  --font-plus-jakarta-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Core Brand Palette */
+  --bg-cream: #FDFBD4;
+  --surface-card: #FFFDF2;
+  --brand-orange: #C05800;
+  --brand-orange-hover: #A64B00;
+  --brand-chestnut: #713600;
+  --brand-espresso: #38240D;
+  --text-muted: #6E5438;
+
+  /* Status Colors */
+  --status-ready: #2E7D32;
+  --status-alert: #B91C1C;
+
+  /* Semantic Borders */
+  --border-chestnut-20: rgba(113, 54, 0, 0.20);
+  --border-chestnut-15: rgba(113, 54, 0, 0.15);
+
+  /* Shadows */
+  --shadow-card: 0 2px 12px rgba(56, 36, 13, 0.08);
+  --shadow-card-hover: 0 6px 24px rgba(56, 36, 13, 0.14);
+  --shadow-modal: 0 20px 60px rgba(56, 36, 13, 0.18);
+}
+
+/* ─── Global Base Styles ──────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--bg-cream);
+  color: var(--brand-espresso);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Typography Utilities ────────────────────────────────────────────────── */
+.font-heading {
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+}
+
+/* Price / Timer — tabular numbers for alignment */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ─── Scrollbar Styling ───────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-chestnut-20);
+  border-radius: 999px;
+}
+
+/* ─── Reusable Component Layer ────────────────────────────────────────────── */
+@layer components {
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3
+           font-semibold text-white transition-all duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2;
+    background-color: var(--brand-orange);
+  }
+  .btn-primary:hover {
+    background-color: var(--brand-orange-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3
+           font-semibold transition-all duration-200 border
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chestnut focus-visible:ring-offset-2;
+    color: var(--brand-chestnut);
+    border-color: var(--border-chestnut-20);
+    background-color: var(--surface-card);
+  }
+  .btn-secondary:hover {
+    background-color: var(--bg-cream);
+    transform: translateY(-1px);
+  }
+
+  /* ── Cards ── */
+  .card {
+    @apply rounded-2xl p-4;
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-chestnut-15);
+    box-shadow: var(--shadow-card);
+  }
+  .card:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* ── Page Container (Customer Mobile Shell) ── */
+  .mobile-shell {
+    @apply mx-auto min-h-screen relative;
+    max-width: 480px;
+    background-color: var(--bg-cream);
+    border-left: 1px solid var(--border-chestnut-15);
+    border-right: 1px solid var(--border-chestnut-15);
+  }
+
+  /* ── KDS Dark Canvas ── */
+  .kds-canvas {
+    @apply min-h-screen;
+    background-color: var(--brand-espresso);
+    color: var(--bg-cream);
+  }
+
+  /* ── Admin Sidebar ── */
+  .admin-sidebar {
+    @apply h-full flex flex-col;
+    background-color: var(--brand-espresso);
+    color: var(--bg-cream);
+  }
+
+  /* ── Badge ── */
+  .badge-table {
+    @apply inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-semibold;
+    background-color: rgba(113, 54, 0, 0.12);
+    color: var(--brand-chestnut);
+  }
+
+  .badge-status-new {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    background-color: rgba(192, 88, 0, 0.12);
+    color: var(--brand-orange);
+  }
+
+  .badge-status-preparing {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    background-color: rgba(113, 54, 0, 0.12);
+    color: var(--brand-chestnut);
+  }
+
+  .badge-status-ready {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    background-color: rgba(46, 125, 50, 0.12);
+    color: var(--status-ready);
+  }
+
+  .badge-status-alert {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    background-color: rgba(185, 28, 28, 0.12);
+    color: var(--status-alert);
+  }
+
+  /* ── Category Pill ── */
+  .category-pill {
+    @apply inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 whitespace-nowrap;
+    color: var(--brand-chestnut);
+    border: 1px solid var(--border-chestnut-20);
+    background-color: var(--surface-card);
+  }
+  .category-pill.active {
+    color: white;
+    background-color: var(--brand-orange);
+    border-color: var(--brand-orange);
+  }
+  .category-pill:hover:not(.active) {
+    background-color: rgba(192, 88, 0, 0.08);
+  }
+}
